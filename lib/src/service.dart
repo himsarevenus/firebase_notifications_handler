@@ -253,7 +253,9 @@ class PushNotificationService {
 
     _notificationIdCallback ??= (_) => DateTime.now().hashCode;
 
-    if (appState == AppState.open) {
+    if (appState == AppState.open &&
+        message.notification?.title != null &&
+        message.notification?.body != null) {
       await localNotifications.show(
         _notificationIdCallback!(message),
         message.notification?.title,

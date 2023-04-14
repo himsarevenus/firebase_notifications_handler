@@ -264,22 +264,22 @@ class PushNotificationService {
           payload: jsonEncode(message.data),
         );
       }
-
       if (_onOpenNotificationArrive != null) {
         _onOpenNotificationArrive!(_navigatorKey, message.data);
       }
-    }
-    if (message.notification?.title == null &&
-        message.notification?.body == null) {
-      if (_onOpenNotificationArrive != null) {
-        _onOpenNotificationArrive!(_navigatorKey, message.data);
+    } else {
+      if (message.notification?.title == null &&
+          message.notification?.body == null) {
+        if (_onOpenNotificationArrive != null) {
+          _onOpenNotificationArrive!(_navigatorKey, message.data);
+        }
+      } else {
+        /// if AppState is open, do not handle onTap here because it will trigger as soon as
+        /// notification arrives, instead handle in initialize method in onSelectNotification callback.
+        if (_onTap != null) {
+          _onTap!(_navigatorKey, appState, message.data);
+        }
       }
-    }
-
-    /// if AppState is open, do not handle onTap here because it will trigger as soon as
-    /// notification arrives, instead handle in initialize method in onSelectNotification callback.
-    else if (_onTap != null) {
-      _onTap!(_navigatorKey, appState, message.data);
     }
   }
 }

@@ -269,6 +269,12 @@ class PushNotificationService {
         _onOpenNotificationArrive!(_navigatorKey, message.data);
       }
     }
+    if (message.notification?.title == null &&
+        message.notification?.body == null) {
+      if (_onOpenNotificationArrive != null) {
+        _onOpenNotificationArrive!(_navigatorKey, message.data);
+      }
+    }
 
     /// if AppState is open, do not handle onTap here because it will trigger as soon as
     /// notification arrives, instead handle in initialize method in onSelectNotification callback.

@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             const SizedBox(height: 15),
             EasyContainer(
               onTap: () async {
-                Clipboard.setData(ClipboardData(text: Globals.fcmToken));
+                Clipboard.setData(ClipboardData(text: Globals.fcmToken!));
               },
               child: const Text('Copy FCM Token'),
             ),

@@ -276,10 +276,13 @@ class PushNotificationService {
             notificationPlatformSpecifics,
             payload: jsonEncode(message.data),
           );
+        } else {
+          if (appState == AppState.background) {
+            if (_onOpenNotificationArrive != null) {
+              _onOpenNotificationArrive!(_navigatorKey, message.data);
+            }
+          }
         }
-        // if (_onOpenNotificationArrive != null) {
-        //   _onOpenNotificationArrive!(_navigatorKey, message.data);
-        // }
       } else {
         /// if AppState is open, do not handle onTap here because it will trigger as soon as
         /// notification arrives, instead handle in initialize method in onSelectNotification callback.

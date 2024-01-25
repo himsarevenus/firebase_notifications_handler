@@ -76,8 +76,7 @@ class PushNotificationService {
       GlobalKey<NavigatorState>,
       AppState,
       Map<String, dynamic> payload,
-    )?
-        onTap,
+    )? onTap,
     GlobalKey<NavigatorState>? navigatorKey,
     String? customSound,
     required bool handleInitialMessage,
@@ -89,8 +88,7 @@ class PushNotificationService {
     required void Function(
       GlobalKey<NavigatorState> navigatorKey,
       Map<String, dynamic> payload,
-    )?
-        onOpenNotificationArrive,
+    )? onOpenNotificationArrive,
   }) async {
     _onTap = onTap;
     _enableLogs = enableLogs;
@@ -270,6 +268,13 @@ class PushNotificationService {
     } else {
       if (message.notification?.title == null &&
           message.notification?.body == null) {
+        await localNotifications.show(
+          _notificationIdCallback!(message),
+          message.data['title'],
+          message.data['body'],
+          notificationPlatformSpecifics,
+          payload: jsonEncode(message.data),
+        );
         if (_onOpenNotificationArrive != null) {
           _onOpenNotificationArrive!(_navigatorKey, message.data);
         }

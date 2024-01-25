@@ -268,16 +268,18 @@ class PushNotificationService {
     } else {
       if (message.notification?.title == null &&
           message.notification?.body == null) {
-        await localNotifications.show(
-          _notificationIdCallback!(message),
-          message.data['title'],
-          message.data['body'],
-          notificationPlatformSpecifics,
-          payload: jsonEncode(message.data),
-        );
-        if (_onOpenNotificationArrive != null) {
-          _onOpenNotificationArrive!(_navigatorKey, message.data);
+        if (message.data['action'] == 'chat') {
+          await localNotifications.show(
+            _notificationIdCallback!(message),
+            message.data['title'],
+            message.data['body'],
+            notificationPlatformSpecifics,
+            payload: jsonEncode(message.data),
+          );
         }
+        // if (_onOpenNotificationArrive != null) {
+        //   _onOpenNotificationArrive!(_navigatorKey, message.data);
+        // }
       } else {
         /// if AppState is open, do not handle onTap here because it will trigger as soon as
         /// notification arrives, instead handle in initialize method in onSelectNotification callback.

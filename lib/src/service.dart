@@ -144,10 +144,12 @@ class PushNotificationService {
       _notificationHandler(message, appState: AppState.open);
 
   /// [_onBackgroundMessage] callback for the notification
+  @pragma('vm:entry-point')
   static Future<void> _onBackgroundMessage(RemoteMessage message) =>
       _notificationHandler(message, appState: AppState.closed);
 
   /// [_onMessageOpenedApp] callback for the notification
+  @pragma('vm:entry-point')
   static Future<void> _onMessageOpenedApp(RemoteMessage message) =>
       _notificationHandler(message, appState: AppState.background);
 

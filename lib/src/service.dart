@@ -269,18 +269,17 @@ class PushNotificationService {
       if (message.notification?.title == null &&
           message.notification?.body == null) {
         if (message.data['action'] == 'chat') {
+          final data = jsonDecode(message.data['event_data']);
           await localNotifications.show(
             _notificationIdCallback!(message),
-            message.data['title'],
-            message.data['body'],
+            data['title'],
+            data['body'],
             notificationPlatformSpecifics,
             payload: jsonEncode(message.data),
           );
         } else {
-          if (appState == AppState.background) {
-            if (_onOpenNotificationArrive != null) {
-              _onOpenNotificationArrive!(_navigatorKey, message.data);
-            }
+          if (_onOpenNotificationArrive != null) {
+            _onOpenNotificationArrive!(_navigatorKey, message.data);
           }
         }
       } else {

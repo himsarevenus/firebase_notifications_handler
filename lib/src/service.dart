@@ -268,7 +268,7 @@ class PushNotificationService {
     } else {
       if (message.notification?.title == null &&
           message.notification?.body == null) {
-        if (message.data['action'] == 'chat') {
+        if (message.data['action'] == '/chat') {
           final data = jsonDecode(message.data['event_data']);
           await localNotifications.show(
             _notificationIdCallback!(message),
@@ -277,10 +277,6 @@ class PushNotificationService {
             notificationPlatformSpecifics,
             payload: jsonEncode(message.data),
           );
-        } else {
-          if (_onOpenNotificationArrive != null) {
-            _onOpenNotificationArrive!(_navigatorKey, message.data);
-          }
         }
       } else {
         /// if AppState is open, do not handle onTap here because it will trigger as soon as

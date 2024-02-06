@@ -180,6 +180,28 @@ class PushNotificationService {
     return flutterLocalNotificationsPlugin;
   }
 
+  static Future<FlutterLocalNotificationsPlugin> initChatNotif() async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      iOS: DarwinInitializationSettings(),
+    );
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        final payload = details.payload;
+        if (_onTap != null) {
+          _onTap!(
+            _navigatorKey,
+            AppState.background,
+            payload == null ? {} : jsonDecode(payload),
+          );
+        }
+      },
+    );
+    return flutterLocalNotificationsPlugin;
+  }
+
   /// [_notificationHandler] implementation
   static Future<void> _notificationHandler(
     RemoteMessage message, {
@@ -250,40 +272,9 @@ class PushNotificationService {
     );
 
     final localNotifications = await _initializeLocalNotifications();
+    final localChatNotifications = await initChatNotif();
 
     _notificationIdCallback ??= (_) => DateTime.now().hashCode;
-
-    Future<void> handleChatNotif(RemoteMessage message) async {
-      final data = jsonDecode(message.data['event_data']);
-      final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-      const initializationSettings = InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-        iOS: DarwinInitializationSettings(),
-      );
-      await flutterLocalNotificationsPlugin.initialize(
-        initializationSettings,
-        onDidReceiveNotificationResponse: (details) {
-          final payload = details.payload;
-          if (_onTap != null) {
-            _onTap!(
-              _navigatorKey,
-              AppState.closed,
-              payload == null ? {} : jsonDecode(payload),
-            );
-          }
-        },
-      );
-      await flutterLocalNotificationsPlugin.show(
-        _notificationIdCallback!(message),
-        data['title'],
-        '${data['message']['sender']['name']}: ${data['body']}',
-        NotificationDetails(
-          android: androidSpecifics,
-          iOS: const DarwinNotificationDetails(),
-        ),
-        payload: jsonEncode(message.data),
-      );
-    }
 
     if (appState == AppState.open) {
       if (message.notification?.title != null &&
@@ -303,7 +294,17 @@ class PushNotificationService {
       if (message.notification?.title == null &&
           message.notification?.body == null) {
         if (message.data['action'] == '/chat') {
-          await handleChatNotif(message);
+          final data = jsonDecode(message.data['event_data']);
+          await localChatNotifications.show(
+            _notificationIdCallback!(message),
+            data['title'],
+            '${data['message']['sender']['name']}: ${data['body']}',
+            NotificationDetails(
+              android: androidSpecifics,
+              iOS: const DarwinNotificationDetails(),
+            ),
+            payload: jsonEncode(message.data),
+          );
         }
       } else {
         /// if AppState is open, do not handle onTap here because it will trigger as soon as

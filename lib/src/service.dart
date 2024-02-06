@@ -275,7 +275,7 @@ class PushNotificationService {
           await localNotifications.show(
             _notificationIdCallback!(message),
             data['title'],
-            data['body'],
+            '${data['message']['sender']['name']}: ${data['body']}',
             NotificationDetails(
               android: androidSpecifics,
               iOS: const DarwinNotificationDetails(),

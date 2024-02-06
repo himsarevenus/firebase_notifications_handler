@@ -253,6 +253,38 @@ class PushNotificationService {
 
     _notificationIdCallback ??= (_) => DateTime.now().hashCode;
 
+    Future<void> handleChatNotif(RemoteMessage message) async {
+      final data = jsonDecode(message.data['event_data']);
+      final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+      const initializationSettings = InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        iOS: DarwinInitializationSettings(),
+      );
+      await flutterLocalNotificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: (details) {
+          final payload = details.payload;
+          if (_onTap != null) {
+            _onTap!(
+              _navigatorKey,
+              AppState.closed,
+              payload == null ? {} : jsonDecode(payload),
+            );
+          }
+        },
+      );
+      await flutterLocalNotificationsPlugin.show(
+        _notificationIdCallback!(message),
+        data['title'],
+        '${data['message']['sender']['name']}: ${data['body']}',
+        NotificationDetails(
+          android: androidSpecifics,
+          iOS: const DarwinNotificationDetails(),
+        ),
+        payload: jsonEncode(message.data),
+      );
+    }
+
     if (appState == AppState.open) {
       if (message.notification?.title != null &&
           message.notification?.body != null) {
@@ -271,24 +303,14 @@ class PushNotificationService {
       if (message.notification?.title == null &&
           message.notification?.body == null) {
         if (message.data['action'] == '/chat') {
-          final data = jsonDecode(message.data['event_data']);
-          await localNotifications.show(
-            _notificationIdCallback!(message),
-            data['title'],
-            '${data['message']['sender']['name']}: ${data['body']}',
-            NotificationDetails(
-              android: androidSpecifics,
-              iOS: const DarwinNotificationDetails(),
-            ),
-            payload: jsonEncode(message.data),
-          );
+          await handleChatNotif(message);
         }
-      }
-
-      /// if AppState is open, do not handle onTap here because it will trigger as soon as
-      /// notification arrives, instead handle in initialize method in onSelectNotification callback.
-      if (_onTap != null) {
-        _onTap!(_navigatorKey, appState, message.data);
+      } else {
+        /// if AppState is open, do not handle onTap here because it will trigger as soon as
+        /// notification arrives, instead handle in initialize method in onSelectNotification callback.
+        if (_onTap != null) {
+          _onTap!(_navigatorKey, appState, message.data);
+        }
       }
     }
   }

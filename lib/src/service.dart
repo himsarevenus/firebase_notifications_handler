@@ -276,7 +276,10 @@ class PushNotificationService {
             _notificationIdCallback!(message),
             data['title'],
             data['body'],
-            notificationPlatformSpecifics,
+            NotificationDetails(
+              android: androidSpecifics,
+              iOS: const DarwinNotificationDetails(),
+            ),
             payload: jsonEncode(message.data),
           );
         }

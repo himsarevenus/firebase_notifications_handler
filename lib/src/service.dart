@@ -181,6 +181,18 @@ class PushNotificationService {
   }
 
   static Future<FlutterLocalNotificationsPlugin> initChatNotif() async {
+    @pragma('vm:entry-point')
+    void notificationTapBackground(NotificationResponse notificationResponse) {
+      final payload = notificationResponse.payload;
+      if (_onTap != null) {
+        _onTap!(
+          _navigatorKey,
+          AppState.background,
+          payload == null ? {} : jsonDecode(payload),
+        );
+      }
+    }
+
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -188,16 +200,8 @@ class PushNotificationService {
     );
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        final payload = details.payload;
-        if (_onTap != null) {
-          _onTap!(
-            _navigatorKey,
-            AppState.background,
-            payload == null ? {} : jsonDecode(payload),
-          );
-        }
-      },
+      onDidReceiveNotificationResponse: notificationTapBackground,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     return flutterLocalNotificationsPlugin;
   }

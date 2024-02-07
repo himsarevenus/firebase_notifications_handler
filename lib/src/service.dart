@@ -180,6 +180,28 @@ class PushNotificationService {
     return flutterLocalNotificationsPlugin;
   }
 
+  static Future<FlutterLocalNotificationsPlugin> initChatNotif() async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      iOS: DarwinInitializationSettings(),
+    );
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        final payload = details.payload;
+        if (_onTap != null) {
+          _onTap!(
+            _navigatorKey,
+            AppState.background,
+            payload == null ? {} : jsonDecode(payload),
+          );
+        }
+      },
+    );
+    return flutterLocalNotificationsPlugin;
+  }
+
   /// [_notificationHandler] implementation
   static Future<void> _notificationHandler(
     RemoteMessage message, {
@@ -242,7 +264,13 @@ class PushNotificationService {
       enableVibration: true,
     );
 
-    final iOsSpecifics = DarwinNotificationDetails(sound: _customSound);
+    final iOsSpecifics = DarwinNotificationDetails(
+      sound: _customSound,
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: InterruptionLevel.active,
+    );
 
     final notificationPlatformSpecifics = NotificationDetails(
       android: androidSpecifics,
@@ -250,6 +278,7 @@ class PushNotificationService {
     );
 
     final localNotifications = await _initializeLocalNotifications();
+    final localChatNotifications = await initChatNotif();
 
     _notificationIdCallback ??= (_) => DateTime.now().hashCode;
 
@@ -272,23 +301,28 @@ class PushNotificationService {
           message.notification?.body == null) {
         if (message.data['action'] == '/chat') {
           final data = jsonDecode(message.data['event_data']);
-          await localNotifications.show(
+          await localChatNotifications.show(
             _notificationIdCallback!(message),
             data['title'],
             '${data['message']['sender']['name']}: ${data['body']}',
             NotificationDetails(
               android: androidSpecifics,
-              iOS: const DarwinNotificationDetails(),
+              iOS: const DarwinNotificationDetails(
+                presentAlert: true,
+                presentBadge: true,
+                presentSound: true,
+                interruptionLevel: InterruptionLevel.active,
+              ),
             ),
             payload: jsonEncode(message.data),
           );
         }
-      }
-
-      /// if AppState is open, do not handle onTap here because it will trigger as soon as
-      /// notification arrives, instead handle in initialize method in onSelectNotification callback.
-      if (_onTap != null) {
-        _onTap!(_navigatorKey, appState, message.data);
+      } else {
+        /// if AppState is open, do not handle onTap here because it will trigger as soon as
+        /// notification arrives, instead handle in initialize method in onSelectNotification callback.
+        if (_onTap != null) {
+          _onTap!(_navigatorKey, appState, message.data);
+        }
       }
     }
   }

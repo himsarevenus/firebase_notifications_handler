@@ -308,7 +308,7 @@ class PushNotificationService {
           await localChatNotifications.show(
             _notificationIdCallback!(message),
             data['title'],
-            '${data['message']['sender']['name']}: ${data['body']}',
+            '${data['message']['sender']['name']}: ${data['message']['body']}',
             NotificationDetails(
               android: androidSpecifics,
               iOS: const DarwinNotificationDetails(

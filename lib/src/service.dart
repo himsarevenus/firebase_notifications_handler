@@ -180,19 +180,20 @@ class PushNotificationService {
     return flutterLocalNotificationsPlugin;
   }
 
-  static Future<FlutterLocalNotificationsPlugin> initChatNotif() async {
-    @pragma('vm:entry-point')
-    void notificationTapBackground(NotificationResponse notificationResponse) {
-      final payload = notificationResponse.payload;
-      if (_onTap != null) {
-        _onTap!(
-          _navigatorKey,
-          AppState.background,
-          payload == null ? {} : jsonDecode(payload),
-        );
-      }
+  @pragma('vm:entry-point')
+  static void notificationTapBackground(
+      NotificationResponse notificationResponse) {
+    final payload = notificationResponse.payload;
+    if (_onTap != null) {
+      _onTap!(
+        _navigatorKey,
+        AppState.background,
+        payload == null ? {} : jsonDecode(payload),
+      );
     }
+  }
 
+  static Future<FlutterLocalNotificationsPlugin> initChatNotif() async {
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -200,7 +201,6 @@ class PushNotificationService {
     );
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: notificationTapBackground,
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
     return flutterLocalNotificationsPlugin;
@@ -310,7 +310,7 @@ class PushNotificationService {
           await localChatNotifications.show(
             _notificationIdCallback!(message),
             data['title'],
-            '${data['message']['sender']['name']}: ${data['body']}',
+            '${data['message']['sender']['name']}: ${data['message']['body']}',
             NotificationDetails(
               android: androidSpecifics,
               iOS: const DarwinNotificationDetails(

@@ -175,6 +175,7 @@ class PushNotificationService {
           );
         }
       },
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     return flutterLocalNotificationsPlugin;
@@ -191,19 +192,6 @@ class PushNotificationService {
         payload == null ? {} : jsonDecode(payload),
       );
     }
-  }
-
-  static Future<FlutterLocalNotificationsPlugin> initChatNotif() async {
-    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    const initializationSettings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-      iOS: DarwinInitializationSettings(),
-    );
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-    );
-    return flutterLocalNotificationsPlugin;
   }
 
   /// [_notificationHandler] implementation
@@ -282,7 +270,6 @@ class PushNotificationService {
     );
 
     final localNotifications = await _initializeLocalNotifications();
-    final localChatNotifications = await initChatNotif();
 
     _notificationIdCallback ??= (_) => DateTime.now().hashCode;
 
@@ -305,9 +292,7 @@ class PushNotificationService {
           message.notification?.body == null) {
         if (message.data['action'] == '/chat') {
           final data = jsonDecode(message.data['event_data']);
-          debugPrint(
-              '${data['message']['sender']['name']}: ${data['message']['body'].toString()}');
-          await localChatNotifications.show(
+          await localNotifications.show(
             _notificationIdCallback!(message),
             data['title'],
             '${data['message']['sender']['name']}: ${data['message']['body']}',

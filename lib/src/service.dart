@@ -306,7 +306,7 @@ class PushNotificationService {
         if (message.data['action'] == '/chat') {
           final data = jsonDecode(message.data['event_data']);
           debugPrint(
-              '${data['message']['sender']['name']}: ${data['message']['body']}');
+              '${data['message']['sender']['name']}: ${data['message']['body'].toString()}');
           await localChatNotifications.show(
             _notificationIdCallback!(message),
             data['title'],

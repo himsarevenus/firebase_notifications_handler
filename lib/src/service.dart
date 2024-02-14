@@ -288,32 +288,10 @@ class PushNotificationService {
         _onOpenNotificationArrive!(_navigatorKey, message.data);
       }
     } else {
-      if (message.notification?.title == null &&
-          message.notification?.body == null) {
-        if (message.data['action'] == '/chat') {
-          final data = jsonDecode(message.data['event_data']);
-          await localNotifications.show(
-            _notificationIdCallback!(message),
-            data['title'],
-            '${data['message']['sender']['name']}: ${data['message']['body']}',
-            NotificationDetails(
-              android: androidSpecifics,
-              iOS: const DarwinNotificationDetails(
-                presentAlert: true,
-                presentBadge: true,
-                presentSound: true,
-                interruptionLevel: InterruptionLevel.active,
-              ),
-            ),
-            payload: jsonEncode(message.data),
-          );
-        }
-      } else {
-        /// if AppState is open, do not handle onTap here because it will trigger as soon as
-        /// notification arrives, instead handle in initialize method in onSelectNotification callback.
-        if (_onTap != null) {
-          _onTap!(_navigatorKey, appState, message.data);
-        }
+      /// if AppState is open, do not handle onTap here because it will trigger as soon as
+      /// notification arrives, instead handle in initialize method in onSelectNotification callback.
+      if (_onTap != null) {
+        _onTap!(_navigatorKey, appState, message.data);
       }
     }
   }

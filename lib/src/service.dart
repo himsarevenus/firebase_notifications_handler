@@ -248,16 +248,20 @@ class PushNotificationService {
       styleInformation: styleInformation,
       priority: Priority.high,
       groupKey: _groupKey,
-      sound: _customSound == null
-          ? null
-          : RawResourceAndroidNotificationSound(_customSound),
+      sound: (message.notification?.title ?? '').contains('Reminder')
+          ? _customSound == null
+              ? null
+              : RawResourceAndroidNotificationSound(_customSound)
+          : null,
       playSound: true,
       enableLights: true,
       enableVibration: true,
     );
 
     final iOsSpecifics = DarwinNotificationDetails(
-      sound: _customSound,
+      sound: (message.notification?.title ?? '').contains('Reminder')
+          ? _customSound
+          : null,
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
